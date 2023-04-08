@@ -38,6 +38,7 @@ pip-log.txt
 pip-delete-this-directory.txt
 main_logs.log
 program.log
+constants.py
 
 # Unit test / coverage reports
 htmlcov/
