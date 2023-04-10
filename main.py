@@ -45,7 +45,7 @@ dispetcher = Dispatcher(bot)
 async def echo_start(message: types.Message) -> None:
     logger.info(
         f'Получена команда /start от пользователя {message.from_user.username} id = {message.from_user.id}.')
-    text = "Что Вас интересует?"
+    text = "Здравствуйте! Выберете категорию вопроса."
     logger.info(
         f'Попытка отправить сообщение: "{text}" для пользователя {message.from_user.username} id = {message.from_user.id}.')
     try:
@@ -97,10 +97,9 @@ async def callback_key(callback: types.CallbackQuery) -> None:
         result = serch_key_by_part(faq, key)
         if isinstance(result, dict):
             keyboard = menu_buttons(result)
-            text = "Выберете вопрос"
             message = callback.message
             logger.info(
-                f'Попытка отправить сообщение: "{text}" для пользователя {callback.from_user.username} id = {callback.from_user.id}.')
+                f'Попытка отправить сообщение с новой клавиатурой для пользователя {callback.from_user.username} id = {callback.from_user.id}.')
             await bot.edit_message_reply_markup(
                 chat_id=message.chat.id,
                 message_id=message.message_id,
