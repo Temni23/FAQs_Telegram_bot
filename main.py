@@ -42,7 +42,8 @@ dispetcher = Dispatcher(bot)
 
 
 @dispetcher.message_handler(commands=["start"])
-async def echo_start(message: types.Message) -> None:
+async def command_start(message: types.Message) -> None:
+    """Функция обрабатывает команду start"""
     logger.info(
         f'Получена команда /start от пользователя {message.from_user.username} id = {message.from_user.id}.')
     text = "Здравствуйте! Выберете категорию вопроса."
@@ -63,7 +64,9 @@ async def echo_start(message: types.Message) -> None:
 
 
 @dispetcher.message_handler()
-async def text_message_handler(message: types.Message) -> None:
+async def randon_text_message_handler(message: types.Message) -> None:
+    """Функция отправляет случайный ответ из предустановленного списка на текстовое
+    сообщение пользователя"""
     logger.info(
         f'Получено сообщение:"{message.text}", от пользователя {message.from_user.username} id = {message.from_user.id}.')
     try:
@@ -79,7 +82,10 @@ async def text_message_handler(message: types.Message) -> None:
 
 
 @dispetcher.callback_query_handler()
-async def callback_key(callback: types.CallbackQuery) -> None:
+async def faq_callback_key(callback: types.CallbackQuery) -> None:
+    """Функция отвечает за работу с инлайн клавиатурой.
+    По нажатой кнопке приходит поиск категории либо писк ответа,
+    который направляется пользователю"""
     key = callback.data
     logger.info(
         f'Нажата кнопка: "{key}" для пользователя {callback.from_user.username} id = {callback.from_user.id}.')
@@ -88,14 +94,13 @@ async def callback_key(callback: types.CallbackQuery) -> None:
             text = "Что Вас интересует?"
             logger.info(
                 f'Попытка отправить сообщение: "{text}" для пользователя {callback.from_user.username} id = {callback.from_user.id}.')
-            await bot.send_message(
-                chat_id=callback.from_user.id,
-                text=text,
-                reply_markup=menu_buttons(faq)
-            )
+            await callback.message.edit_text(text=text, reply_markup=menu_buttons(faq))
             return await callback.answer()
-        result = serch_key_by_part(faq, key)
-        if isinstance(result, dict):
+        result = serch_key_by_part(faq, key)   # Поиск в словаре результата по
+        # нажатой пользователем кнопке
+        if isinstance(result, dict):  # Если результатом поиска является словарь,
+            # формируется новое меню из кнопок, где для текста кнопок используются
+            # ключи словаря result
             keyboard = menu_buttons(result)
             message = callback.message
             logger.info(
@@ -108,7 +113,8 @@ async def callback_key(callback: types.CallbackQuery) -> None:
                                          callback_data="Главное меню"))
             )
             await callback.answer()
-        else:
+        else: # В окончании result содержит строковое значение которое
+            # направляется пользователю в ответе
             logger.info(
                 f'Попытка отправить сообщение: "{result}" для пользователя {callback.from_user.username} id = {callback.from_user.id}.')
             await callback.message.edit_text(text=result, reply_markup=get_main_menu(),
