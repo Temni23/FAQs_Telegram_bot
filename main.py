@@ -48,7 +48,11 @@ dispetcher = Dispatcher(bot, storage=storage)
 class MessageStatesGroup(StatesGroup):
     address = State()
     name = State()
-    text = State()
+    phone = State()
+    consumer_email = State()
+    question = State()
+    feedback = State()
+    confirmation = State()
 
 
 @dispetcher.message_handler(commands=["start"])
@@ -91,9 +95,8 @@ async def cmd_cancel(callback: types.CallbackQuery, state: FSMContext) -> None:
     return await callback.answer()
 
 
-
 @dispetcher.callback_query_handler(
-    lambda callback: callback.data == "Написать обращение", state="*")
+    lambda callback: callback.data == "Написать обращение")
 async def get_adress(callback: types.CallbackQuery) -> None:
     await bot.send_message(chat_id=callback.from_user.id,
                            text="Напишите адрес с которым связано ваше обращение",
@@ -110,27 +113,92 @@ async def get_name(message: types.Message, state: FSMContext) -> None:
 
 
 @dispetcher.message_handler(state=MessageStatesGroup.name)
-async def get_trobble(message: types.Message, state: FSMContext) -> None:
-    await message.reply(text="Опишите суть проблемы", reply_markup=get_cancel())
+async def get_phone(message: types.Message, state: FSMContext) -> None:
+    await message.reply(
+        text='Введите номер своего контактного телефона через "8" без пробелов, '
+             'тире и прочих лишних знаков. Например "89231234567"',
+        reply_markup=get_cancel())
     await MessageStatesGroup.next()
     await state.update_data(name=message.text)
 
 
-@dispetcher.message_handler(state=MessageStatesGroup.text)
-async def get_finish(message: types.Message, state: FSMContext) -> None:
-    await state.update_data(text=message.text)
+@dispetcher.message_handler(state=MessageStatesGroup.phone)
+async def get_email(message: types.Message, state: FSMContext) -> None:
+    await message.reply(
+        text='Введите номер адрес своей электронной почты. На этот адрес Вам может быть направлен ответ. '
+             'Например "examle@mail.ru"',
+        reply_markup=get_cancel())
+    await MessageStatesGroup.next()
+    await state.update_data(phone=message.text)
+
+
+@dispetcher.message_handler(state=MessageStatesGroup.consumer_email)
+async def get_trobble(message: types.Message, state: FSMContext) -> None:
+    await message.reply(text="Опишите суть проблемы", reply_markup=get_cancel())
+    await MessageStatesGroup.next()
+    await state.update_data(consumer_email=message.text)
+
+
+@dispetcher.message_handler(state=MessageStatesGroup.question)
+async def get_feedback(message: types.Message, state: FSMContext) -> None:
+    keyboard = get_cancel()
+    button_1 = InlineKeyboardButton(text="Электронная почта",
+                                    callback_data="Электронная почта")
+    button_2 = InlineKeyboardButton(text="Сообщением в Телеграм",
+                                    callback_data="Телеграм")
+    button_3 = InlineKeyboardButton(text="Почтой на указанный адрес",
+                                    callback_data="Почтой России")
+    keyboard.add(button_1).add(button_2).add(button_3)
+    await message.reply(text="Выберете способ обратной связи", reply_markup=keyboard)
+    await MessageStatesGroup.next()
+    await state.update_data(question=message.text)
+
+
+@dispetcher.callback_query_handler(state=MessageStatesGroup.feedback)
+async def get_conformation(callback: types.CallbackQuery, state: FSMContext) -> None:
+    await state.update_data(feedback=callback.data)
     async with state.proxy() as data:
         address = data.get('address')
         name = data.get('name')
-        trobble = data.get('text')
-        text = f"Поступило новвое обращение от потребителя: {name}, " \
-               f"\n указавшего адрес: {address}, " \
-               f"\n содержание обращения: {trobble}"
-        await bot.send_message(chat_id=287530282, text=text)
+        question = data.get('question')
+        phone = data.get('phone')
+        consumer_email = data.get('consumer_email')
+        feedback = data.get('feedback')
+        # text = f"Поступило новвое обращение от потребителя: {name}, " \
+        #        f"\n указавшего адрес: {address}, " \
+        #        f"\n содержание обращения: {question}"
+        # await bot.send_message(chat_id=287530282, text=text)
+        # await send_email(text)
+        text_checkup = f'Давайте проверим корректность введенных данных.' \
+                       f' \nАдрес: {address}\nФИО: {name}\nТелефон: {phone}' \
+                       f'\nЭлектронная почта: {consumer_email}\nВопрос: {question}' \
+                       f'\nСпособ обратной связи: {feedback}'
+    keyboad = get_cancel()
+    keyboad.add(InlineKeyboardButton(text='ВСЕ ВЕРНО!', callback_data='Верно'))
+    await bot.send_message(chat_id=callback.from_user.id, text=text_checkup,
+                           reply_markup=keyboad)
+    await callback.answer()
+    await MessageStatesGroup.next()
+
+
+@dispetcher.callback_query_handler(state=MessageStatesGroup.confirmation)
+async def get_conformation(callback: types.CallbackQuery, state: FSMContext) -> None:
+    await bot.send_message(chat_id=callback.from_user.id, text="Обращение принято!",
+                           reply_markup=get_main_menu())
+    async with state.proxy() as data:
+        address = data.get('address')
+        name = data.get('name')
+        question = data.get('question')
+        phone = data.get('phone')
+        consumer_email = data.get('consumer_email')
+        feedback = data.get('feedback')
+        text = f"Поступило новое обращение от потребителя: {name}, " \
+               f"\nАдрес: {address}\nТелефон: {phone}" \
+               f"\nЭлектронная почта: {consumer_email}" \
+               f"\nсодержание обращения: {question}\nСпособ обратной связи: {feedback}"
+        await bot.send_message(chat_id=int(os.getenv('TARGET_TG')), text=text)
         await send_email(text)
-
-    await message.reply(text="Ваше обращение принято", reply_markup=get_main_menu())
-
+    await callback.answer()
     await state.finish()
 
 

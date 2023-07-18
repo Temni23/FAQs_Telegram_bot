@@ -1,6 +1,7 @@
 import logging
-import smtplib
 import os
+import smtplib
+from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from logging.handlers import RotatingFileHandler
@@ -50,13 +51,16 @@ def get_cancel() -> InlineKeyboardMarkup:
 
 
 async def send_email(message_text):
+    """Отправляет письмо на заданную почту"""
     email = os.getenv("EMAIL")
     password = os.getenv("PASSWORD_EMAIL")
+    target_email = os.getenv("TARGET_EMAIL")
+    time = datetime.now()
 
     msg = MIMEMultipart()
     msg['From'] = email
-    msg['To'] = 'temni@mail.ru'
-    msg['Subject'] = 'Новое обращение принято ботом'
+    msg['To'] = target_email
+    msg['Subject'] = f"Новое обращение принято ботом {time.strftime('%Y-%m-%d %H:%M')}"
     msg.attach(MIMEText(message_text))
     try:
         mailserver = smtplib.SMTP('smtp.yandex.ru', 587)
