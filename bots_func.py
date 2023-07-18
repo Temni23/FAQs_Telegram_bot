@@ -1,4 +1,8 @@
 import logging
+import smtplib
+import os
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from logging.handlers import RotatingFileHandler
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -28,8 +32,44 @@ def menu_buttons(faq: dict) -> InlineKeyboardMarkup:
 
 
 def get_main_menu() -> InlineKeyboardMarkup:
-    """Формирует и возвращает Inline клавиатуру с одной кнопкой Главное меню"""
+    """Формирует и возвращает Inline клавиатуру  Главное меню и направить обращение"""
     keyboard = InlineKeyboardMarkup()
     button = InlineKeyboardButton(text='Главное меню', callback_data='Главное меню')
+    button2 = InlineKeyboardButton(text='Написать обращение',
+                                   callback_data='Написать обращение')
+    keyboard.add(button).add(button2)
+    return keyboard
+
+
+def get_cancel() -> InlineKeyboardMarkup:
+    """Формирует и возвращает Inline клавиатуру с одной кнопкой Отмена"""
+    keyboard = InlineKeyboardMarkup()
+    button = InlineKeyboardButton(text='Отмена', callback_data='cancel')
     keyboard.add(button)
     return keyboard
+
+
+async def send_email(message_text):
+    email = os.getenv("EMAIL")
+    password = os.getenv("PASSWORD_EMAIL")
+
+    msg = MIMEMultipart()
+    msg['From'] = email
+    msg['To'] = 'temni@mail.ru'
+    msg['Subject'] = 'Новое обращение принято ботом'
+    msg.attach(MIMEText(message_text))
+    try:
+        mailserver = smtplib.SMTP('smtp.yandex.ru', 587)
+
+        mailserver.ehlo()
+        # Защищаем соединение с помощью шифрования tls
+        mailserver.starttls()
+        # Повторно идентифицируем себя как зашифрованное соединение перед аутентификацией.
+        mailserver.ehlo()
+        mailserver.login(email, password)
+
+        mailserver.sendmail(email, 'temni@mail.ru', msg.as_string())
+
+        mailserver.quit()
+    except smtplib.SMTPException:
+        print("Ошибка: Невозможно отправить сообщение")
