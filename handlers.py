@@ -3,8 +3,7 @@ import os
 from logging.handlers import RotatingFileHandler
 from random import choice
 
-from aiogram import Bot
-from aiogram import types
+from aiogram import types, Bot
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardButton
 from dotenv import load_dotenv
@@ -12,10 +11,8 @@ from dotenv import load_dotenv
 from bots_func import menu_buttons, get_main_menu
 from constants import faq, text_message_ansers
 from dictionary_functions import serch_key_by_part
-
 load_dotenv()
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-
 bot = Bot(TELEGRAM_TOKEN)
 
 logging.basicConfig(

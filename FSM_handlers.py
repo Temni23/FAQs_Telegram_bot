@@ -7,11 +7,11 @@ from dotenv import load_dotenv
 
 from FSM_Classes import MessageStatesGroup
 from bots_func import get_cancel, send_email, get_main_menu
-
 load_dotenv()
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-
 bot = Bot(TELEGRAM_TOKEN)
+
+load_dotenv()
 
 
 async def get_address_handler(callback: types.CallbackQuery) -> None:

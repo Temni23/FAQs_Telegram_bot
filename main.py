@@ -1,12 +1,21 @@
+import logging
 import os
-from aiogram import Dispatcher, executor
+from logging.handlers import RotatingFileHandler
+
+from aiogram import Dispatcher, executor, Bot, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.dispatcher import FSMContext
 from dotenv import load_dotenv
 
 from FSM_Classes import MessageStatesGroup
-from FSM_handlers import *
-from bots_func import get_cancel, send_email
-from handlers import *
+from FSM_handlers import (get_address_handler, get_name_handler,
+                          get_phone_handler,
+                          get_email_handler, get_question_handler,
+                          get_feedback_handler,
+                          get_conformation_handler, get_finish_handler)
+from handlers import (command_start, handler_cancel,
+    random_text_message_handler,
+    faq_callback_key_handler)
 
 load_dotenv()
 
