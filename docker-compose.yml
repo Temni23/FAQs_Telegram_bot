@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  bot:
+    container_name: FAQ_BOT
+    image: pytem/faq_tg_bot
+    env_file: .env
+    restart: always
+    command: sh -c "python main.py"
