@@ -8,6 +8,7 @@ from aiogram.types import InlineKeyboardButton
 
 from bots_func import menu_buttons, get_main_menu
 from constants import faq, text_message_ansers
+from contacts_funtions import save_user_id
 from dictionary_functions import serch_key_by_part
 from settings import bot
 
@@ -43,6 +44,8 @@ async def command_start(message: types.Message) -> None:
         )
         logger.info(
             f'сообщение:"{text}" пользователя {message.from_user.username} id = {message.from_user.id} успешно отправлено.')
+        save_user_id(str(message.from_user.id),
+                     message.from_user.full_name, message.from_user.username)
 
         await message.delete()
     except Exception as error:
