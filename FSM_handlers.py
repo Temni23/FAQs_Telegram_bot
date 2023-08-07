@@ -17,7 +17,7 @@ async def get_address_handler(callback: types.CallbackQuery) -> None:
                            text=("Начнем! \nОтветным сообщением направляйте мне нужную "
                                  "информацию, а я ее обработаю. \nПожалуйста, вводите "
                                  "верные данные, это очень важно для эффективного "
-                                 "решения Вашего вопроса.\n"
+                                 "решения Вашего вопроса.\n\n"
                                  "1/6 Напишите адрес с которым связано ваше обращение"),
                            reply_markup=get_cancel())
     await MessageStatesGroup.address.set()

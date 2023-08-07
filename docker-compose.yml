@@ -1,9 +1,14 @@
 version: '3'
 
+volumes:
+  logs:
+
 services:
   bot:
     container_name: FAQ_BOT
     image: pytem/faq_tg_bot
     env_file: .env
+    volumes:
+      - logs:/app/logs
     restart: always
     command: sh -c "python main.py"

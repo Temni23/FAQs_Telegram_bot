@@ -21,7 +21,7 @@ load_dotenv()
 
 logging.basicConfig(
     level=logging.ERROR,
-    filename='program.log',
+    filename='logs/program.log',
     filemode="a",
     format='%(asctime)s, %(levelname)s, %(message)s, %(name)s',
     encoding="UTF-8"
@@ -29,7 +29,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-handler = RotatingFileHandler("main_logs.log", encoding="UTF-8")
+handler = RotatingFileHandler("logs/main_logs.log", encoding="UTF-8")
 formatter = logging.Formatter(
     '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
