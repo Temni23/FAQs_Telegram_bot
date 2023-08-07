@@ -2,6 +2,7 @@ version: '3'
 
 volumes:
   logs:
+  contacts:
 
 services:
   bot:
@@ -10,5 +11,6 @@ services:
     env_file: .env
     volumes:
       - logs:/app/logs
+      - contacts:/app/contacts
     restart: always
     command: sh -c "python main.py"
