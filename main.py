@@ -98,15 +98,17 @@ async def get_email(message: types.Message, state: FSMContext) -> None:
 
 @dispetcher.message_handler(state=MessageStatesGroup.phone)
 async def check_phone(message: types.Message) -> None:
-    """Проверяет номер телефона введенный пользователем, функция отрабатывает если
-     введено что-то не соответсвующее паттерну из get_email"""
-    await message.answer("Введите корректный номер телефона без пробелов и тире."
-                         "Например: 89081234567",
-                         reply_markup=get_cancel())
+    """Проверяет номер телефона введенный пользователем, функция отрабатывает
+    если введено что-то не соответсвующее паттерну из get_email"""
+    await message.answer(
+        "Введите корректный номер телефона без пробелов и тире."
+        "Например: 89081234567",
+        reply_markup=get_cancel())
 
 
-@dispetcher.message_handler(regexp=r'^[-\w.]+@([A-z0-9][-A-z0-9]+\.)+[A-z]{2,7}$',
-                            state=MessageStatesGroup.consumer_email)
+@dispetcher.message_handler(
+    regexp=r'^[-\w.]+@([A-z0-9][-A-z0-9]+\.)+[A-z]{2,7}$',
+    state=MessageStatesGroup.consumer_email)
 async def get_question(message: types.Message, state: FSMContext) -> None:
     """Функция отрабатывает если пользователь ввел валидный email"""
     await get_question_handler(message, state)
@@ -122,8 +124,9 @@ async def check_email(message: types.Message, state: FSMContext) -> None:
                             state=MessageStatesGroup.question)
 async def check_question(message: types.Message) -> None:
     """Проверяет вопрос введенный пользователем на количество символов"""
-    await message.answer("Опишите свой вопрос хотя бы в двух словах, пожалуйста.",
-                         reply_markup=get_cancel())
+    await message.answer(
+        "Опишите свой вопрос хотя бы в двух словах, пожалуйста.",
+        reply_markup=get_cancel())
 
 
 @dispetcher.message_handler(state=MessageStatesGroup.question)
@@ -148,7 +151,8 @@ async def check_finish(message: types.Message) -> None:
 
 
 @dispetcher.callback_query_handler(state=MessageStatesGroup.feedback)
-async def get_conformation(callback: types.CallbackQuery, state: FSMContext) -> None:
+async def get_conformation(callback: types.CallbackQuery,
+                           state: FSMContext) -> None:
     await get_conformation_handler(callback, state)
 
 
@@ -159,8 +163,8 @@ async def get_finish(callback: types.CallbackQuery, state: FSMContext) -> None:
 
 @dispetcher.message_handler()
 async def random_text_message_answer(message: types.Message) -> None:
-    """Функция отправляет случайный ответ из предустановленного списка на текстовое
-    сообщение пользователя"""
+    """Функция отправляет случайный ответ из предустановленного списка на
+    текстовое сообщение пользователя"""
     await random_text_message_handler(message)
 
 
