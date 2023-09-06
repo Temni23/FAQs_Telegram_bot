@@ -1,3 +1,4 @@
+"""Функции для сохранения контактов."""
 import json
 from time import sleep
 
@@ -5,6 +6,7 @@ from settings import bot
 
 
 def save_user_id(user_id: str, full_name: str, username: str) -> None:
+    """Сохраняет ID пользователя в файл."""
     # Открываем файл contacts.json для чтения и записи
     with open('contacts/contacts.json', 'r+') as contacts:
         try:
@@ -17,7 +19,8 @@ def save_user_id(user_id: str, full_name: str, username: str) -> None:
         # Проверяем, если user_id уже существует в файле
         if user_id in data:
             print(
-                f'Пользователь с ID {user_id} уже существует в файле contacts.json')
+                f'Пользователь с ID {user_id}'
+                f'уже существует в файле contacts.json')
         else:
             # Добавляем user_id в формате "user_id": user_id в словарь данных
             data.update({
@@ -35,10 +38,12 @@ def save_user_id(user_id: str, full_name: str, username: str) -> None:
             contacts.truncate()
 
             print(
-                f'Пользователь с ID {user_id} успешно сохранен в файле contacts.json')
+                f'Пользователь с ID {user_id}'
+                f'успешно сохранен в файле contacts.json')
 
 
 async def send_messages_for_contacts(message: str) -> None:
+    """Отправляет сообщение по всей книге контакотов."""
     with open('contacts/contacts.json') as contacts:
         try:
             contacts_data = json.load(contacts)
