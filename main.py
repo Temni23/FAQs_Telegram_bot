@@ -1,3 +1,4 @@
+"""Главный модуль бота."""
 import logging
 from logging.handlers import RotatingFileHandler
 
@@ -41,25 +42,28 @@ MessageStatesGroup()
 
 @dispetcher.message_handler(commands=["start"])
 async def start_command_handler(message: types.Message):
+    """Отрабатывает на команду start."""
     await command_start(message)
 
 
 @dispetcher.callback_query_handler(lambda callback: callback.data == 'cancel',
                                    state="*")
 async def cmd_cancel(callback: types.CallbackQuery, state: FSMContext) -> None:
+    """Отрабатывает на команду cancel."""
     await handler_cancel(callback, state)
 
 
 @dispetcher.callback_query_handler(
     lambda callback: callback.data == "Написать обращение")
 async def get_address(callback: types.CallbackQuery) -> None:
+    """Отрабатывает на этапе ввода адреса."""
     await get_address_handler(callback)
 
 
 @dispetcher.message_handler(lambda message: len(message.text) < 4,
                             state=MessageStatesGroup.address)
 async def check_address(message: types.Message) -> None:
-    """Проверяет адрес введенный пользователем на количество символов"""
+    """Проверяет адрес введенный пользователем на количество символов."""
     await message.answer(
         "Введите правильный адрес. Это чрезвычайно важно для корректной "
         "работы с Вашим вопросом.",
@@ -68,7 +72,7 @@ async def check_address(message: types.Message) -> None:
 
 @dispetcher.message_handler(state=MessageStatesGroup.address)
 async def get_name(message: types.Message, state: FSMContext) -> None:
-    """Функция отрабатывает если пользователь ввел валидный адрес"""
+    """Функция отрабатывает если пользователь ввел валидный адрес."""
     await get_name_handler(message, state)
 
 
@@ -76,15 +80,16 @@ async def get_name(message: types.Message, state: FSMContext) -> None:
     regexp=r'^[а-яА-ЯёЁa-zA-Z]+[ .-а-яА-ЯёЁa-zA-Z]+?[ -юа-яА-ЯёЁa-zA-Z]+$',
     state=MessageStatesGroup.name)
 async def get_phone(message: types.Message, state: FSMContext) -> None:
-    """Функция отрабатывает если пользователь ввел валидные ФИО"""
+    """Функция отрабатывает если пользователь ввел валидные ФИО."""
     await get_phone_handler(message, state)
 
 
 @dispetcher.message_handler(state=MessageStatesGroup.name)
 async def check_name(message: types.Message, state: FSMContext) -> None:
+    """роверяет введенное ФИО на соответствие паттерну."""
     await message.answer(
-        "Представьтесь пожалуется, отправьте ответным сообщением Ваше ФИО."
-        "Например: Иванов Петр Иванович",
+        "Представьтесь пожалуется, отправьте ответным сообщением "
+        "Ваше ФИО. Например: Иванов Петр Иванович",
         reply_markup=get_cancel())
 
 
@@ -92,14 +97,17 @@ async def check_name(message: types.Message, state: FSMContext) -> None:
     regexp=r'^(8|\+7)[\- ]?\(?\d{3}\)?[\- ]?\d{3}[\- ]?\d{2}[\- ]?\d{2}$',
     state=MessageStatesGroup.phone)
 async def get_email(message: types.Message, state: FSMContext) -> None:
-    """Функция отрабатывает если пользователь ввел валидный телефон"""
+    """Функция отрабатывает если пользователь ввел валидный телефон."""
     await get_email_handler(message, state)
 
 
 @dispetcher.message_handler(state=MessageStatesGroup.phone)
 async def check_phone(message: types.Message) -> None:
-    """Проверяет номер телефона введенный пользователем, функция отрабатывает
-    если введено что-то не соответсвующее паттерну из get_email"""
+    """
+    Проверяет номер телефона введенный пользователем.
+
+    Функция отрабатывает если введено не соответсвующее паттерну get_email.
+    """
     await message.answer(
         "Введите корректный номер телефона без пробелов и тире."
         "Например: 89081234567",
@@ -110,12 +118,13 @@ async def check_phone(message: types.Message) -> None:
     regexp=r'^[-\w.]+@([A-z0-9][-A-z0-9]+\.)+[A-z]{2,7}$',
     state=MessageStatesGroup.consumer_email)
 async def get_question(message: types.Message, state: FSMContext) -> None:
-    """Функция отрабатывает если пользователь ввел валидный email"""
+    """Функция отрабатывает если пользователь ввел валидный email."""
     await get_question_handler(message, state)
 
 
 @dispetcher.message_handler(state=MessageStatesGroup.consumer_email)
 async def check_email(message: types.Message, state: FSMContext) -> None:
+    """Функция отправляет сообщение на не валидный email."""
     await message.answer("Введите корректный адрес электронной почты.",
                          reply_markup=get_cancel())
 
@@ -123,7 +132,7 @@ async def check_email(message: types.Message, state: FSMContext) -> None:
 @dispetcher.message_handler(lambda message: len(message.text) < 5,
                             state=MessageStatesGroup.question)
 async def check_question(message: types.Message) -> None:
-    """Проверяет вопрос введенный пользователем на количество символов"""
+    """Проверяет вопрос введенный пользователем на количество символов."""
     await message.answer(
         "Опишите свой вопрос хотя бы в двух словах, пожалуйста.",
         reply_markup=get_cancel())
@@ -131,21 +140,29 @@ async def check_question(message: types.Message) -> None:
 
 @dispetcher.message_handler(state=MessageStatesGroup.question)
 async def get_feedback(message: types.Message, state: FSMContext) -> None:
+    """Отрабатывает на этапе получения способа обратной связи."""
     await get_feedback_handler(message, state)
 
 
 @dispetcher.message_handler(state=MessageStatesGroup.feedback)
 async def check_conformation(message: types.Message) -> None:
-    """Функция отрабатывает если пользователь ввел ответ на сообщение
-     с инлайн клавиатурой"""
-    await message.answer("Воспользуйтесь клавиатурой в предыдущем сообщении.",
+    """
+    Отрабатывает если пользователь ввел ответ на сообщение.
+
+    Сообщение содержит инлайн клавиатуру.
+    """
+    await message.answer("Воспользуйтесь клавиатурой в предыдущем "
+                         "сообщении.",
                          reply_markup=get_cancel())
 
 
 @dispetcher.message_handler(state=MessageStatesGroup.confirmation)
 async def check_finish(message: types.Message) -> None:
-    """Функция отрабатывает если пользователь ввел ответ на сообщение
-         с инлайн клавиатурой"""
+    """
+    Отрабатывает если пользователь ввел ответ на сообщение.
+
+    Сообщение содержит инлайн клавиатуру.
+    """
     await message.answer("Воспользуйтесь клавиатурой в предыдущем сообщении.",
                          reply_markup=get_cancel())
 
@@ -153,26 +170,35 @@ async def check_finish(message: types.Message) -> None:
 @dispetcher.callback_query_handler(state=MessageStatesGroup.feedback)
 async def get_conformation(callback: types.CallbackQuery,
                            state: FSMContext) -> None:
+    """Отрабатывает если при подтверждении данных."""
     await get_conformation_handler(callback, state)
 
 
 @dispetcher.callback_query_handler(state=MessageStatesGroup.confirmation)
 async def get_finish(callback: types.CallbackQuery, state: FSMContext) -> None:
+    """Отрабатывает при завершении приема обращения."""
     await get_finish_handler(callback, state)
 
 
 @dispetcher.message_handler()
 async def random_text_message_answer(message: types.Message) -> None:
-    """Функция отправляет случайный ответ из предустановленного списка на
-    текстовое сообщение пользователя"""
+    """
+    Функция отправляет случайный ответ из предустановленного списка.
+
+    На текстовое сообщение пользователя.
+    """
     await random_text_message_handler(message)
 
 
 @dispetcher.callback_query_handler()
 async def faq_callback_key(callback: types.CallbackQuery) -> None:
-    """Функция отвечает за работу с инлайн клавиатурой.
+    """
+    Функция отвечает за работу с инлайн клавиатурой.
+
     По нажатой кнопке приходит поиск категории либо писк ответа,
-    который направляется пользователю"""
+
+    который направляется пользователю.
+    """
     await faq_callback_key_handler(callback)
 
 
