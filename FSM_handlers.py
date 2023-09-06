@@ -1,3 +1,4 @@
+"""Модуль с хэндлерами для приема обращения пользователя."""
 import os
 
 from aiogram import types
@@ -13,18 +14,25 @@ load_dotenv()
 
 
 async def get_address_handler(callback: types.CallbackQuery) -> None:
+    """Получить адрес от пользователя."""
     await bot.send_message(chat_id=callback.from_user.id,
-                           text=("Начнем! \nОтветным сообщением направляйте мне нужную "
-                                 "информацию, а я ее обработаю. \nПожалуйста, вводите "
-                                 "верные данные, это очень важно для эффективного "
-                                 "решения Вашего вопроса.\n\n"
-                                 "1/6 Напишите адрес с которым связано ваше обращение"),
+                           text=(
+                               "Начнем! \nОтветным сообщением направляйте"
+                               " мне нужную "
+                               "информацию, а я ее обработаю. "
+                               "\nПожалуйста, вводите "
+                               "верные данные, это очень важно для "
+                               "эффективного "
+                               "решения Вашего вопроса.\n\n"
+                               "1/6 Напишите адрес с которым связано ваше "
+                               "обращение"),
                            reply_markup=get_cancel())
     await MessageStatesGroup.address.set()
     return await callback.answer()
 
 
 async def get_name_handler(message: types.Message, state: FSMContext) -> None:
+    """Получить ФИО от пользователя."""
     await message.reply(text="2/6 Напишите Вашу Фамилию Имя и Отчество",
                         reply_markup=get_cancel())
     await MessageStatesGroup.next()
@@ -32,15 +40,17 @@ async def get_name_handler(message: types.Message, state: FSMContext) -> None:
 
 
 async def get_phone_handler(message: types.Message, state: FSMContext) -> None:
+    """Получить телефон от пользователя."""
     await message.reply(
-        text='3/6 Введите номер своего контактного телефона через "8" без пробелов, '
-             'тире и прочих лишних знаков. Например "89231234567"',
+        text='3/6 Введите номер своего контактного телефона через "8" без '
+             'пробелов, тире и прочих лишних знаков. Например "89231234567"',
         reply_markup=get_cancel())
     await MessageStatesGroup.next()
     await state.update_data(name=message.text)
 
 
 async def get_email_handler(message: types.Message, state: FSMContext) -> None:
+    """Получить email от пользователя."""
     await message.reply(
         text='4/6 Введите номер адрес своей электронной почты. '
              'На этот адрес Вам может быть направлен ответ. '
@@ -50,13 +60,18 @@ async def get_email_handler(message: types.Message, state: FSMContext) -> None:
     await state.update_data(phone=message.text)
 
 
-async def get_question_handler(message: types.Message, state: FSMContext) -> None:
-    await message.reply(text="5/6 Опишите суть проблемы", reply_markup=get_cancel())
+async def get_question_handler(message: types.Message,
+                               state: FSMContext) -> None:
+    """Получить текст обращения от пользователя."""
+    await message.reply(text="5/6 Опишите суть проблемы",
+                        reply_markup=get_cancel())
     await MessageStatesGroup.next()
     await state.update_data(consumer_email=message.text)
 
 
-async def get_feedback_handler(message: types.Message, state: FSMContext) -> None:
+async def get_feedback_handler(message: types.Message,
+                               state: FSMContext) -> None:
+    """Получить способ обратной связи от пользователя."""
     keyboard = get_cancel()
     button_1 = InlineKeyboardButton(text="Электронная почта",
                                     callback_data="Электронная почта")
@@ -74,6 +89,7 @@ async def get_feedback_handler(message: types.Message, state: FSMContext) -> Non
 
 async def get_conformation_handler(callback: types.CallbackQuery,
                                    state: FSMContext) -> None:
+    """Получить подтверждение корректности данных от пользователя."""
     await state.update_data(feedback=callback.data)
     async with state.proxy() as data:
         address = data.get('address')
@@ -82,11 +98,14 @@ async def get_conformation_handler(callback: types.CallbackQuery,
         phone = data.get('phone')
         consumer_email = data.get('consumer_email')
         feedback = data.get('feedback')
-        text_checkup = f'Готово! Давайте проверим корректность введенных данных.' \
-                       f' \nАдрес: {address}\nФИО: {name}\nТелефон: {phone}' \
-                       f'\nЭлектронная почта: {consumer_email}\nВопрос: {question}' \
-                       f'\nСпособ обратной связи: {feedback}\nЕсли данные верны ' \
-                       f'нажмите кнопку "ВСЕ ВЕРНО!"'
+        text_checkup = (f'Готово! Давайте проверим корректность введенных '
+                        f'данных.'
+                        f' \nАдрес: {address}\nФИО: {name}\nТелефон: {phone}'
+                        f'\nЭлектронная почта: {consumer_email}\n'
+                        f'Вопрос: {question}'
+                        f'\nСпособ обратной связи: {feedback}\n'
+                        f'Если данные верны '
+                        f'нажмите кнопку "ВСЕ ВЕРНО!"')
     keyboad = get_cancel()
     keyboad.add(InlineKeyboardButton(text='ВСЕ ВЕРНО!', callback_data='Верно'))
     await bot.send_message(chat_id=callback.from_user.id, text=text_checkup,
@@ -95,8 +114,11 @@ async def get_conformation_handler(callback: types.CallbackQuery,
     await MessageStatesGroup.next()
 
 
-async def get_finish_handler(callback: types.CallbackQuery, state: FSMContext) -> None:
-    await bot.send_message(chat_id=callback.from_user.id, text="Ваше обращение принято!",
+async def get_finish_handler(callback: types.CallbackQuery,
+                             state: FSMContext) -> None:
+    """Завершает прием обращения. Направляет его адресату."""
+    await bot.send_message(chat_id=callback.from_user.id,
+                           text="Ваше обращение принято!",
                            reply_markup=get_main_menu())
     async with state.proxy() as data:
         address = data.get('address')
