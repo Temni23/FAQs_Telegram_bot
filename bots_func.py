@@ -1,3 +1,11 @@
+"""
+
+В модуле собраны функция формирующие клавиатуры для работы бота.
+
+Также функция для отправки почты.
+
+"""
+
 import logging
 import os
 import smtplib
@@ -19,10 +27,12 @@ logger.addHandler(handler)
 
 
 def menu_buttons(faq: dict) -> InlineKeyboardMarkup:
-    """Принимает словарь, формирует из ключей словаря кнопки, возвращает
-    Inline клавиатуру"""
+    """Принимает словарь, формирует из ключей словаря кнопки.
+
+    Возвращает Inline клавиатуру
+    """
     logger.debug(
-        f'Пробую сформировать клавиатуру функция menu_buttons.')
+        'Пробую сформировать клавиатуру функция menu_buttons.')
     keybord = InlineKeyboardMarkup(row_width=1)
     for key in faq.keys():
         button = InlineKeyboardButton(text=key, callback_data=key[:32])
@@ -33,9 +43,13 @@ def menu_buttons(faq: dict) -> InlineKeyboardMarkup:
 
 
 def get_main_menu() -> InlineKeyboardMarkup:
-    """Формирует и возвращает Inline клавиатуру  Главное меню и направить обращение"""
+    """Формирует и возвращает Inline клавиатуру, главное меню.
+
+    Направить обращение
+    """
     keyboard = InlineKeyboardMarkup()
-    button = InlineKeyboardButton(text='Главное меню', callback_data='Главное меню')
+    button = InlineKeyboardButton(text='Главное меню',
+                                  callback_data='Главное меню')
     button2 = InlineKeyboardButton(text='Написать обращение',
                                    callback_data='Написать обращение')
     keyboard.add(button).add(button2)
@@ -43,7 +57,7 @@ def get_main_menu() -> InlineKeyboardMarkup:
 
 
 def get_cancel() -> InlineKeyboardMarkup:
-    """Формирует и возвращает Inline клавиатуру с одной кнопкой Отмена"""
+    """Формирует и возвращает Inline клавиатуру с одной кнопкой Отмена."""
     keyboard = InlineKeyboardMarkup()
     button = InlineKeyboardButton(text='Отмена', callback_data='cancel')
     keyboard.add(button)
@@ -51,7 +65,7 @@ def get_cancel() -> InlineKeyboardMarkup:
 
 
 async def send_email(message_text):
-    """Отправляет письмо на заданную почту"""
+    """Отправляет письмо на заданную почту."""
     email = os.getenv("EMAIL")
     password = os.getenv("PASSWORD_EMAIL")
     target_email = os.getenv("TARGET_EMAIL")
@@ -60,7 +74,9 @@ async def send_email(message_text):
     msg = MIMEMultipart()
     msg['From'] = email
     msg['To'] = target_email
-    msg['Subject'] = f"Новое обращение принято ботом {time.strftime('%Y-%m-%d %H:%M')}"
+    msg[
+        'Subject'] = (f"Новое обращение принято ботом "
+                      f"{time.strftime('%Y-%m-%d %H:%M')}")
     msg.attach(MIMEText(message_text))
     try:
         mailserver = smtplib.SMTP('smtp.yandex.ru', 587)
@@ -68,7 +84,8 @@ async def send_email(message_text):
         mailserver.ehlo()
         # Защищаем соединение с помощью шифрования tls
         mailserver.starttls()
-        # Повторно идентифицируем себя как зашифрованное соединение перед аутентификацией.
+        # Повторно идентифицируем себя как зашифрованное соединение
+        # перед аутентификацией.
         mailserver.ehlo()
         mailserver.login(email, password)
 
