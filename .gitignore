@@ -154,4 +154,4 @@ media/
 
 contacts.json
 contacts.txt
-constants.py
+constants/constants.py

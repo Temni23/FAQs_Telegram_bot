@@ -9,7 +9,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardButton
 
 from bots_func import menu_buttons, get_main_menu
-from constants import faq, text_message_ansers
+from constants.constants import faq, text_message_ansers
 from contacts_funtions import save_user_id
 from dictionary_functions import serch_key_by_part
 from settings import bot

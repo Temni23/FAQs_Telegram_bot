@@ -25,34 +25,6 @@ jobs:
           context: .
           push: true
           tags: pytem/faq_tg_bot:latest
-#  deploy:
-#    runs-on: ubuntu-latest
-#    needs:
-#      - build_backend_and_push_to_docker_hub
-#    steps:
-#      - name: Checkout repo
-#        uses: actions/checkout@v3
-#      - name: Copy docker-compose.yml via ssh
-#        uses: appleboy/scp-action@master
-#        with:
-#          host: ${{ secrets.HOST }}
-#          username: ${{ secrets.USER }}
-#          password: ${{ secrets.PASSWORD }}
-#          source: "docker-compose.yml"
-#          target: "faq_bot"
-#      - name: Executing remote ssh commands to deploy
-#        uses: appleboy/ssh-action@master
-#        with:
-#          host: ${{ secrets.HOST }}
-#          username: ${{ secrets.USER }}
-#          password: ${{ secrets.PASSWORD }}
-#          script: |
-#            cd faq_bot
-#            # Выполняет pull образов с Docker Hub
-#            sudo docker compose pull
-#            # Перезапускает все контейнеры в Docker Compose
-#            sudo docker compose down
-#            sudo docker compose up -d
 
   send_message:
     runs-on: ubuntu-latest

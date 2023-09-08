@@ -10,6 +10,7 @@ services:
     image: pytem/faq_tg_bot
     env_file: .env
     volumes:
+      - ./constants.py:/app/constants/constants.py
       - logs:/app/logs
       - contacts:/app/contacts
     restart: always
