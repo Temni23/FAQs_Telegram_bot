@@ -203,6 +203,4 @@ async def faq_callback_key(callback: types.CallbackQuery) -> None:
 
 
 if __name__ == "__main__":
-    # if not check_tokens():
-    #     sys.exit()
     executor.start_polling(dispetcher, skip_updates=True)
