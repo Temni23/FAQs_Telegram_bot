@@ -5,7 +5,7 @@ from time import sleep
 from settings import bot
 
 
-def save_user_id(user_id: str, full_name: str, username: str) -> None:
+def save_user_id(user_data: dict) -> None:
     """Сохраняет ID пользователя в файл."""
     # Открываем файл contacts.json для чтения и записи
     with open('contacts/contacts.json', 'r+') as contacts:
@@ -14,32 +14,26 @@ def save_user_id(user_id: str, full_name: str, username: str) -> None:
             data = json.load(contacts)
         except json.JSONDecodeError:
             # Обработка ошибки, если файл пуст
-            data = {}
+            data = {'users': []}
 
         # Проверяем, если user_id уже существует в файле
-        if user_id in data:
-            print(
-                f'Пользователь с ID {user_id}'
-                f'уже существует в файле contacts.json')
+        users = data['users']
+        if user_data in users:
+            print(f'Пользователь с ID {user_data} уже существует в файле '
+                  f'contacts.json')
         else:
-            # Добавляем user_id в формате "user_id": user_id в словарь данных
-            data.update({
-                user_id: {
-                    'fullname': full_name,
-                    'username': username
-                }
-            })
+            # Добавляем user_id в формате "user_id": user_id в список данных
+            users.append(user_data)
 
             # Перемещаем указатель в начало файла
             contacts.seek(0)
 
             # Записываем обновленные данные обратно в файл
-            json.dump(data, contacts, ensure_ascii=False)
+            json.dump({'users': users}, contacts, ensure_ascii=False)
             contacts.truncate()
 
-            print(
-                f'Пользователь с ID {user_id}'
-                f'успешно сохранен в файле contacts.json')
+            print(f'Пользователь с ID {user_data} успешно сохранен в '
+                  f'файле contacts.json')
 
 
 async def send_messages_for_contacts(message: str) -> None:

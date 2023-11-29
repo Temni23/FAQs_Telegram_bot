@@ -49,8 +49,7 @@ async def command_start(message: types.Message) -> None:
         logger.info(
             f'сообщение:"{text}" пользователя {message.from_user.username}'
             f'id = {message.from_user.id} успешно отправлено.')
-        save_user_id(str(message.from_user.id),
-                     message.from_user.full_name, message.from_user.username)
+        save_user_id(message.from_user.values)
 
         await message.delete()
     except Exception as error:
