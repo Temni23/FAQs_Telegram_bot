@@ -16,6 +16,10 @@ from logging.handlers import RotatingFileHandler
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 handler = RotatingFileHandler("logs/main_logs.log", encoding="UTF-8")
@@ -89,7 +93,7 @@ async def send_email(message_text):
         mailserver.ehlo()
         mailserver.login(email, password)
 
-        mailserver.sendmail(email, 'temni@mail.ru', msg.as_string())
+        mailserver.sendmail(email, target_email, msg.as_string())
 
         mailserver.quit()
     except smtplib.SMTPException:
