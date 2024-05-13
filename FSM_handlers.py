@@ -75,11 +75,13 @@ async def get_feedback_handler(message: types.Message,
     keyboard = get_cancel()
     button_1 = InlineKeyboardButton(text="Электронная почта",
                                     callback_data="Электронная почта")
-    button_2 = InlineKeyboardButton(text="Сообщением в Телеграм",
-                                    callback_data="Телеграм")
     button_3 = InlineKeyboardButton(text="Почтой на указанный адрес",
                                     callback_data="Почтой России")
-    keyboard.add(button_1).add(button_2).add(button_3)
+    keyboard.add(button_1).add(button_3)
+    if '@' in message.from_user.mention:
+        button_2 = InlineKeyboardButton(text="Сообщением в Телеграм",
+                                        callback_data="Телеграм")
+        keyboard.add(button_2)
     await message.reply(text="6/6 Выберете способ обратной связи "
                              "(нажмите кнопку внизу сообщения).",
                         reply_markup=keyboard)

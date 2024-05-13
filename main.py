@@ -86,7 +86,7 @@ async def get_phone(message: types.Message, state: FSMContext) -> None:
 
 @dispetcher.message_handler(state=MessageStatesGroup.name)
 async def check_name(message: types.Message, state: FSMContext) -> None:
-    """роверяет введенное ФИО на соответствие паттерну."""
+    """Проверяет введенное ФИО на соответствие паттерну."""
     await message.answer(
         "Представьтесь пожалуется, отправьте ответным сообщением "
         "Ваше ФИО. Например: Иванов Петр Иванович",
@@ -139,7 +139,8 @@ async def check_question(message: types.Message) -> None:
 
 
 @dispetcher.message_handler(state=MessageStatesGroup.question)
-async def get_feedback(message: types.Message, state: FSMContext) -> None:
+async def get_feedback(message: types.Message, state: FSMContext
+                       ) -> None:
     """Отрабатывает на этапе получения способа обратной связи."""
     await get_feedback_handler(message, state)
 
