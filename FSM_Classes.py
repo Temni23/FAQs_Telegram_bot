@@ -12,3 +12,12 @@ class MessageStatesGroup(StatesGroup):
     question = State()
     feedback = State()
     confirmation = State()
+
+
+class ApplicationStatesGroup(StatesGroup):
+    """Класс для приема заявки от пользователя."""
+
+    address_application = State()
+    name_application = State()
+    phone_application = State()
+    confirmation_application = State()
