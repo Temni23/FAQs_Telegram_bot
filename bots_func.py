@@ -56,7 +56,9 @@ def get_main_menu() -> InlineKeyboardMarkup:
                                   callback_data='Главное меню')
     button2 = InlineKeyboardButton(text='Написать обращение',
                                    callback_data='Написать обращение')
-    keyboard.add(button).add(button2)
+    button3 = InlineKeyboardButton(text='Заявка на вывоз ТКО МИНУСИНСК',
+                                   callback_data='Подать заявку')
+    keyboard.add(button).add(button2).add(button3)
     return keyboard
 
 
@@ -68,11 +70,10 @@ def get_cancel() -> InlineKeyboardMarkup:
     return keyboard
 
 
-async def send_email(message_text):
+async def send_email(message_text, target_email):
     """Отправляет письмо на заданную почту."""
     email = os.getenv("EMAIL")
     password = os.getenv("PASSWORD_EMAIL")
-    target_email = os.getenv("TARGET_EMAIL")
     time = datetime.now()
 
     msg = MIMEMultipart()

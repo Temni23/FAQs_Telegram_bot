@@ -6,13 +6,14 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardButton
 from dotenv import load_dotenv
 
-from FSM_Classes import MessageStatesGroup
+from FSM_Classes import MessageStatesGroup, ApplicationStatesGroup
 from bots_func import get_cancel, send_email, get_main_menu
 from settings import bot
 
 load_dotenv()
 
 
+# Handlers для машины состояний приема обращений
 async def get_address_handler(callback: types.CallbackQuery) -> None:
     """Получить адрес от пользователя."""
     await bot.send_message(chat_id=callback.from_user.id,
@@ -25,7 +26,8 @@ async def get_address_handler(callback: types.CallbackQuery) -> None:
                                "эффективного "
                                "решения Вашего вопроса.\n\n"
                                "1/6 Напишите адрес с которым связано ваше "
-                               "обращение"),
+                               "обращение в формате \U00002757 Город, Улица,"
+                               " Дом, Квартира \U00002757"),
                            reply_markup=get_cancel())
     await MessageStatesGroup.address.set()
     return await callback.answer()
@@ -140,6 +142,90 @@ async def get_finish_handler(callback: types.CallbackQuery,
         Способ обратной связи: {feedback},
         User_id: {user_id}, Полное имя: {full_name}, Ник ТГ: {mention}"""
         await bot.send_message(chat_id=int(os.getenv('TARGET_TG')), text=text)
-        await send_email(text)
+        await send_email(text, os.getenv('TARGET_EMAIL'))
+    await callback.answer()
+    await state.finish()
+
+
+# Handlers для машины состояний приема заявок
+async def get_application_address_handler(
+        callback: types.CallbackQuery) -> None:
+    """Получить адрес от пользователя."""
+    await bot.send_message(chat_id=callback.from_user.id,
+                           text=(
+                               "Начнем! \nОтветным сообщением направляйте"
+                               " мне нужную "
+                               "информацию, а я ее обработаю. "
+                               "\nПожалуйста, вводите "
+                               "верные данные, это очень важно \U0001F64F \n\n"
+                               "1/4 Напишите адрес для вывоза ТКО. "
+                               "В формате Город, Улица, Дом, Квартира\n\n"
+                               "\U00002757\U00002757\U00002757 ВНИМАНИЕ: Это "
+                               "работает только в г. Минусинск"),
+                           reply_markup=get_cancel())
+    await ApplicationStatesGroup.address_application.set()
+    return await callback.answer()
+
+
+async def get_application_name_handler(message: types.Message,
+                                       state: FSMContext) -> None:
+    """Получить ФИО от пользователя."""
+    await message.reply(text="2/6 Напишите Вашу Фамилию Имя и Отчество",
+                        reply_markup=get_cancel())
+    await ApplicationStatesGroup.next()
+    await state.update_data(address_application=message.text)
+
+
+async def get_application_phone_handler(message: types.Message,
+                                        state: FSMContext) -> None:
+    """Получить телефон от пользователя."""
+    await message.reply(
+        text='3/6 Введите номер своего контактного телефона через "8" без '
+             'пробелов, тире и прочих лишних знаков. Например "89231234567"',
+        reply_markup=get_cancel())
+    await ApplicationStatesGroup.next()
+    await state.update_data(name_application=message.text)
+
+
+async def get_application_conformation_handler(message: types.Message,
+                                               state: FSMContext) -> None:
+    """Получить подтверждение корректности данных от пользователя."""
+    await state.update_data(phone_application=message.text)
+    async with state.proxy() as data:
+        address = data.get('address_application')
+        name = data.get('name_application')
+        phone = data.get('phone_application')
+        text_checkup = (f'Готово! Давайте проверим корректность введенных '
+                        f'данных.'
+                        f' \nЗАЯВКА НА ВЫВОЗ ТКО.'
+                        f' \nАдрес: {address}\nФИО: {name}\nТелефон: {phone}'
+                        f'\nЕсли данные верны '
+                        f'нажмите кнопку "ВСЕ ВЕРНО!"')
+    keyboad = get_cancel()
+    keyboad.add(InlineKeyboardButton(text='ВСЕ ВЕРНО!', callback_data='Верно'))
+    await bot.send_message(chat_id=message.from_user.id, text=text_checkup,
+                           reply_markup=keyboad)
+    await ApplicationStatesGroup.next()
+
+
+async def get_application_finish_handler(callback: types.CallbackQuery,
+                                         state: FSMContext) -> None:
+    """Завершает прием обращения. Направляет его адресату."""
+    await bot.send_message(chat_id=callback.from_user.id,
+                           text="Ваша заявка принята!",
+                           reply_markup=get_main_menu())
+    async with state.proxy() as data:
+        address = data.get('address_application')
+        name = data.get('name_application')
+        phone = data.get('phone_application')
+        user_id = callback.from_user.id
+        full_name = callback.from_user.full_name
+        mention = callback.from_user.mention
+        text = f"""Поступила заявка на вывоз ТКО от потребителя: {name},
+        Адрес: {address},
+        Телефон: {phone},
+        User_id: {user_id}, Полное имя: {full_name}, Ник ТГ: {mention}"""
+        await bot.send_message(chat_id=int(os.getenv('TARGET_TG')), text=text)
+        await send_email(text, os.getenv('APPLICATION_TARGET_EMAIL'))
     await callback.answer()
     await state.finish()

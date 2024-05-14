@@ -6,12 +6,17 @@ from aiogram import executor, types
 from aiogram.dispatcher import FSMContext
 from dotenv import load_dotenv
 
-from FSM_Classes import MessageStatesGroup
+from FSM_Classes import MessageStatesGroup, ApplicationStatesGroup
 from FSM_handlers import (get_address_handler, get_name_handler,
                           get_phone_handler,
                           get_email_handler, get_question_handler,
                           get_feedback_handler,
-                          get_conformation_handler, get_finish_handler)
+                          get_conformation_handler, get_finish_handler,
+                          get_application_address_handler,
+                          get_application_name_handler,
+                          get_application_phone_handler,
+                          get_application_conformation_handler,
+                          get_application_finish_handler)
 from bots_func import get_cancel
 from handlers import (command_start, handler_cancel,
                       random_text_message_handler,
@@ -53,6 +58,7 @@ async def cmd_cancel(callback: types.CallbackQuery, state: FSMContext) -> None:
     await handler_cancel(callback, state)
 
 
+# Диспетчеры для машины состояний приема обращений
 @dispetcher.callback_query_handler(
     lambda callback: callback.data == "Написать обращение")
 async def get_address(callback: types.CallbackQuery) -> None:
@@ -60,12 +66,13 @@ async def get_address(callback: types.CallbackQuery) -> None:
     await get_address_handler(callback)
 
 
-@dispetcher.message_handler(lambda message: len(message.text) < 4,
+@dispetcher.message_handler(lambda message: len(message.text) < 14,
                             state=MessageStatesGroup.address)
 async def check_address(message: types.Message) -> None:
     """Проверяет адрес введенный пользователем на количество символов."""
     await message.answer(
-        "Введите правильный адрес. Это чрезвычайно важно для корректной "
+        "Введите правильный адрес в формате \n \U00002757 Город, Улица,"
+        " Дом, Квартира \U00002757 \nЭто чрезвычайно важно для корректной "
         "работы с Вашим вопросом.",
         reply_markup=get_cancel())
 
@@ -179,6 +186,84 @@ async def get_conformation(callback: types.CallbackQuery,
 async def get_finish(callback: types.CallbackQuery, state: FSMContext) -> None:
     """Отрабатывает при завершении приема обращения."""
     await get_finish_handler(callback, state)
+
+
+# Конец блока
+# Диспетчеры для машины состояний приема обращений
+@dispetcher.callback_query_handler(
+    lambda callback: callback.data == "Подать заявку")
+async def get_application_address(
+        callback: types.CallbackQuery) -> None:
+    """Отрабатывает на этапе ввода адреса."""
+    await get_application_address_handler(callback)
+
+
+@dispetcher.message_handler(
+    lambda message: 'минусинск' not in message.text.lower(),
+    state=ApplicationStatesGroup.address_application)
+async def check_application_address(message: types.Message) -> None:
+    """Проверяет адрес введенный пользователем на количество символов."""
+    await message.answer(
+        "Введите правильный адрес. Это чрезвычайно важно для корректной "
+        "работы с заявкой. \U00002757\U00002757\U00002757 ВНИМАНИЕ: Это "
+        "работает только в г. Минусинск",
+        reply_markup=get_cancel())
+
+
+@dispetcher.message_handler(state=ApplicationStatesGroup.address_application)
+async def get_application_name(message: types.Message,
+                               state: FSMContext) -> None:
+    """Функция отрабатывает если пользователь ввел валидный адрес."""
+    await get_application_name_handler(message, state)
+
+
+@dispetcher.message_handler(
+    regexp=r'^[а-яА-ЯёЁa-zA-Z]+[ .-а-яА-ЯёЁa-zA-Z]+?[ -юа-яА-ЯёЁa-zA-Z]+$',
+    state=ApplicationStatesGroup.name_application)
+async def get_application_phone(message: types.Message,
+                                state: FSMContext) -> None:
+    """Функция отрабатывает если пользователь ввел валидные ФИО."""
+    await get_application_phone_handler(message, state)
+
+
+@dispetcher.message_handler(state=ApplicationStatesGroup.name_application)
+async def check_application_name(message: types.Message,
+                                 state: FSMContext) -> None:
+    """Проверяет введенное ФИО на соответствие паттерну."""
+    await message.answer(
+        "Представьтесь пожалуется, отправьте ответным сообщением "
+        "Ваше ФИО. Например: Иванов Петр Иванович",
+        reply_markup=get_cancel())
+
+
+@dispetcher.message_handler(
+    regexp=r'^(8|\+7)[\- ]?\(?\d{3}\)?[\- ]?\d{3}[\- ]?\d{2}[\- ]?\d{2}$',
+    state=ApplicationStatesGroup.phone_application)
+async def get_application_conformation(message: types.Message,
+                                       state: FSMContext) -> None:
+    """Функция отрабатывает если пользователь ввел валидный телефон."""
+    await get_application_conformation_handler(message, state)
+
+
+@dispetcher.message_handler(state=ApplicationStatesGroup.phone_application)
+async def check_application_phone(message: types.Message) -> None:
+    """
+    Проверяет номер телефона введенный пользователем.
+
+    Функция отрабатывает если введено не соответсвующее паттерну get_email.
+    """
+    await message.answer(
+        "Введите корректный номер телефона без пробелов и тире."
+        "Например: 89081234567",
+        reply_markup=get_cancel())
+
+
+@dispetcher.callback_query_handler(
+    state=ApplicationStatesGroup.confirmation_application)
+async def get_application_finish(callback: types.CallbackQuery,
+                                 state: FSMContext) -> None:
+    """Отрабатывает при завершении приема обращения."""
+    await get_application_finish_handler(callback, state)
 
 
 @dispetcher.message_handler()
