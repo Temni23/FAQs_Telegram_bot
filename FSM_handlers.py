@@ -158,7 +158,7 @@ async def get_application_address_handler(
                                "информацию, а я ее обработаю. "
                                "\nПожалуйста, вводите "
                                "верные данные, это очень важно \U0001F64F \n\n"
-                               "1/4 Напишите адрес для вывоза ТКО. "
+                               "1/3 Напишите адрес для вывоза ТКО. "
                                "В формате Город, Улица, Дом, Квартира\n\n"
                                "\U00002757\U00002757\U00002757 ВНИМАНИЕ: Это "
                                "работает только в г. Минусинск"),
@@ -170,7 +170,7 @@ async def get_application_address_handler(
 async def get_application_name_handler(message: types.Message,
                                        state: FSMContext) -> None:
     """Получить ФИО от пользователя."""
-    await message.reply(text="2/6 Напишите Вашу Фамилию Имя и Отчество",
+    await message.reply(text="2/3 Напишите Вашу Фамилию Имя и Отчество",
                         reply_markup=get_cancel())
     await ApplicationStatesGroup.next()
     await state.update_data(address_application=message.text)
@@ -180,8 +180,9 @@ async def get_application_phone_handler(message: types.Message,
                                         state: FSMContext) -> None:
     """Получить телефон от пользователя."""
     await message.reply(
-        text='3/6 Введите номер своего контактного телефона через "8" без '
-             'пробелов, тире и прочих лишних знаков. Например "89231234567"',
+        text='3/3 Введите номер своего контактного телефона \U00002757 через '
+             '"8" без пробелов, тире и прочих лишних знаков\U00002757 '
+             'Например "89231234567"',
         reply_markup=get_cancel())
     await ApplicationStatesGroup.next()
     await state.update_data(name_application=message.text)
