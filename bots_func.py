@@ -51,14 +51,18 @@ def get_main_menu() -> InlineKeyboardMarkup:
 
     Направить обращение
     """
+    application = os.getenv("APPLICATION")
     keyboard = InlineKeyboardMarkup()
     button = InlineKeyboardButton(text='Главное меню',
                                   callback_data='Главное меню')
     button2 = InlineKeyboardButton(text='Написать обращение',
                                    callback_data='Написать обращение')
-    button3 = InlineKeyboardButton(text='Заявка на вывоз ТКО МИНУСИНСК',
+    if application:
+        button3 = InlineKeyboardButton(text='Заявка на вывоз ТКО МИНУСИНСК',
                                    callback_data='Подать заявку')
-    keyboard.add(button).add(button2).add(button3)
+        keyboard.add(button).add(button2).add(button3)
+        return keyboard
+    keyboard.add(button).add(button2)
     return keyboard
 
 
