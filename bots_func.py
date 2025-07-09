@@ -51,7 +51,7 @@ def get_main_menu() -> InlineKeyboardMarkup:
 
     Направить обращение
     """
-    application = os.getenv("APPLICATION")
+    application = os.getenv('APPLICATION', 'False').lower() in ('true', '1')
     keyboard = InlineKeyboardMarkup()
     button = InlineKeyboardButton(text='Главное меню',
                                   callback_data='Главное меню')
